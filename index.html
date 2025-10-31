@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoKite Ecosystem Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .kite-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.03;
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border-radius: 20px;
+            border: 2px solid rgba(218, 165, 32, 0.3);
+        }
+
+        h1 {
+            font-size: 3.5em;
+            background: linear-gradient(135deg, #DAA520 0%, #FFD700 50%, #DAA520 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(218, 165, 32, 0.5);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
+        .kite-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .ecosystem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+
+        .category {
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(218, 165, 32, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #DAA520, #FFD700, #DAA520);
+        }
+
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(218, 165, 32, 0.3);
+            border-color: #FFD700;
+        }
+
+        .category-title {
+            font-size: 1.8em;
+            color: #FFD700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-icon {
+            font-size: 1.2em;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(218, 165, 32, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .project-card:hover {
+            background: rgba(218, 165, 32, 0.2);
+            border-color: #FFD700;
+            transform: translateX(5px);
+        }
+
+        .project-card:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .project-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 8px;
+        }
+
+        .project-type {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            min-width: 280px;
+            max-width: 350px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(218, 165, 32, 0.4);
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 10px solid transparent;
+            border-top-color: #FFD700;
+        }
+
+        .tooltip-content {
+            color: white;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .link-icon {
+            display: inline-block;
+            margin-left: 8px;
+            color: #FFD700;
+            font-size: 0.9em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 60px;
+            border-top: 2px solid rgba(218, 165, 32, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        footer a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #FFF;
+            text-shadow: 0 0 10px rgba(218, 165, 32, 0.8);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .ecosystem-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tooltip {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                bottom: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Kite -->
+    <svg class="kite-bg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 10 L150 60 L100 110 L50 60 Z" fill="#DAA520" opacity="0.5"/>
+        <line x1="100" y1="110" x2="100" y2="180" stroke="#FFD700" stroke-width="2"/>
+        <path d="M90 140 L100 150 L110 140" fill="#DAA520"/>
+        <path d="M85 160 L100 172 L115 160" fill="#DAA520"/>
+    </svg>
+
+    <div class="container">
+        <header>
+            <svg class="kite-icon floating" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 10 L150 60 L100 110 L50 60 Z" fill="#DAA520"/>
+                <line x1="100" y1="110" x2="100" y2="180" stroke="#FFD700" stroke-width="3"/>
+                <path d="M90 140 L100 150 L110 140" fill="#FFD700"/>
+                <path d="M85 160 L100 172 L115 160" fill="#FFD700"/>
+            </svg>
+            <h1>GoKite Ecosystem Map</h1>
+            <p class="subtitle">The First AI Payment Blockchain - Building the Agentic Economy</p>
+        </header>
+
+        <div class="ecosystem-grid">
+            <!-- Infrastructure Partners -->
+            <div class="category">
+                <h2 class="category-title">
+                    <span class="category-icon">🏗️</span>
+                    Infrastructure Partners
+                </h2>
+                <div class="project-card" onclick="window.open('https://pisquaretech.com', '_blank')">
+                    <div class="project-name">Pi Squared <span class="link-icon">↗</span></div>
+                    <div class="project-type">Settlement Infrastructure</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Provides high-performance settlement infrastructure for Kite, enabling fast and secure transaction processing for the AI payment layer.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://irys.xyz', '_blank')">
+                    <div class="project-name">Irys <span class="link-icon">↗</span></div>
+                    <div class="project-type">Data Layer</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Offers permanent data storage and data layer support for the GoKite ecosystem, ensuring data integrity and availability for AI agents.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://www.avax.network', '_blank')">
+                    <div class="project-name">Avalanche <span class="link-icon">↗</span></div>
+                    <div class="project-type">Layer 1 Foundation</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            GoKite is built as a sovereign chain on Avalanche, leveraging its high-throughput subnet architecture for specialized AI environments.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DeFi & Liquidity Partners -->
+            <div class="category">
+                <h2 class="category-title">
+                    <span class="category-icon">💰</span>
+                    DeFi & Liquidity
+                </h2>
+                <div class="project-card" onclick="window.open('https://vishwa.ai', '_blank')">
+                    <div class="project-name">Vishwa <span class="link-icon">↗</span></div>
+                    <div class="project-type">Agent Liquidity Strategies</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Deploys automated agent liquidity strategies on Kite, optimizing capital efficiency and providing liquidity for AI-driven transactions.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://www.stripe.com', '_blank')">
+                    <div class="project-name">Stripe <span class="link-icon">↗</span></div>
+                    <div class="project-type">Payment Infrastructure</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Partner in developing the Agentic Commerce Protocol (ACP), enabling seamless payment integration for AI agents and businesses.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data & Intelligence -->
+            <div class="category">
+                <h2 class="category-title">
+                    <span class="category-icon">📊</span>
+                    Data & Intelligence
+                </h2>
+                <div class="project-card" onclick="window.open('https://getmasa.ai', '_blank')">
+                    <div class="project-name">Masa <span class="link-icon">↗</span></div>
+                    <div class="project-type">Real-time Data Services</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Delivers real-time data services for social agents, providing AI agents with up-to-date information for decision-making and interactions.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://openai.com', '_blank')">
+                    <div class="project-name">OpenAI <span class="link-icon">↗</span></div>
+                    <div class="project-type">AI Model Provider</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Co-maintains the Agentic Commerce Protocol specification, enabling AI agents to complete purchases seamlessly with businesses.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Services -->
+            <div class="category">
+                <h2 class="category-title">
+                    <span class="category-icon">⚙️</span>
+                    Core GoKite Services
+                </h2>
+                <div class="project-card" onclick="window.open('https://testnet.gokite.ai', '_blank')">
+                    <div class="project-name">Kite AIR <span class="link-icon">↗</span></div>
+                    <div class="project-type">Agent Marketplace</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            The App Store for AI agents. Discover and deploy agents for shopping, food delivery, ride-hailing, financial trading, and data analysis.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://docs.gokite.ai', '_blank')">
+                    <div class="project-name">Proof of AI (PoAI) <span class="link-icon">↗</span></div>
+                    <div class="project-type">Consensus Mechanism</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            GoKite's unique consensus mechanism that ensures fair attribution, transparent rewards, and drives ecosystem alignment for AI contributors.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://gokite.ai', '_blank')">
+                    <div class="project-name">Agent Passports <span class="link-icon">↗</span></div>
+                    <div class="project-type">Identity System</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Cryptographic identity for AI models, agents, and datasets. Over 17.8M passports issued, enabling verifiable identity and cross-platform portability.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://github.com/gokite-ai', '_blank')">
+                    <div class="project-name">Developer Tools <span class="link-icon">↗</span></div>
+                    <div class="project-type">SDKs & APIs</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Complete development toolchain with SDKs, APIs, smart contract templates, and documentation for building on the GoKite platform.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Investors & Backers -->
+            <div class="category">
+                <h2 class="category-title">
+                    <span class="category-icon">💼</span>
+                    Investors & Backers
+                </h2>
+                <div class="project-card" onclick="window.open('https://www.paypal.com/ventures', '_blank')">
+                    <div class="project-name">PayPal Ventures <span class="link-icon">↗</span></div>
+                    <div class="project-type">Lead Investor</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Led GoKite's $18M funding round, bringing total funding to $33M. Strategic partner in payment infrastructure development.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Community & Ecosystem -->
+            <div class="category">
+                <h2 class="category-title">
+                    <span class="category-icon">🌐</span>
+                    Community Ecosystem
+                </h2>
+                <div class="project-card" onclick="window.open('https://ecosystem.gokite.ai', '_blank')">
+                    <div class="project-name">100+ Web2 & Web3 Partners <span class="link-icon">↗</span></div>
+                    <div class="project-type">Ecosystem Partners</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            A growing ecosystem of over 100 partners across Web2 AI and Web3 building the future of AI on-chain with GoKite.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://opensea.io/collection/fly-the-kite', '_blank')">
+                    <div class="project-name">Fly The Kite NFT <span class="link-icon">↗</span></div>
+                    <div class="project-type">Community Collection</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Official NFT collection with 2,000 supply and 1,500+ holders. Floor price ~$900-$1,000. May serve as multiplier for future rewards.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" onclick="window.open('https://x.com/GoKiteAI', '_blank')">
+                    <div class="project-name">GoKite Community <span class="link-icon">↗</span></div>
+                    <div class="project-type">Social Hub</div>
+                    <div class="tooltip">
+                        <div class="tooltip-content">
+                            Join the vibrant GoKite community on X (Twitter) for updates, discussions, and engagement with 100+ ecosystem projects.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Made with ❤ by <a href="https://twitter.com/0x_EtherSoul" target="_blank">@0x_EtherSoul</a>
+        </footer>
+    </div>
+</body>
+</html>
